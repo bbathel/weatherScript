@@ -1,0 +1,75 @@
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<style>
+    .key{
+        display:inline-block;
+        width:10%;
+        border-bottom:1px black solid;
+        
+    }
+    .two{
+        border-bottom:1px #555 solid;
+    }
+    .three{
+        border-bottom:1px #aaa solid;
+    }
+    hr{
+        background-color:transparent;
+    }
+</style>
+</head>
+<body>
+    <div id="result"></div>
+<script>
+
+    var url = 'http://api.openweathermap.org/data/2.5/forecast/daily?q=new_orleans&mode=json&units=imperial&cnt=15'
+    var string='';
+    var index=0;
+    var json = {}
+    var mm_to_inches = 0.0393701;
+    climate = {};
+    $.get(url, function(weather,status,xhr){
+        /*climate= JSON.parse(data)
+        console.log(climate[0].weather.rain)
+        console.log('done')*/
+        //string += JSON.stringify(weather)
+        for(;index<weather.list.length;index+=1){
+            string+="<h1>day "+(index+1)+"</h1>";
+            console.log("day "+(index+1)+" "+weather.list[index].weather[0].main)
+            console.log("      "+(weather.list[index].temp.day/**1.8 +32 */))
+            if (weather.list[index].rain) {
+                console.log("      rain = "+(weather.list[index].rain*mm_to_inches)+"in")
+            }else if (weather.list[index].clouds) {
+                console.log("      clouds = " +weather.list[index].clouds+"%");
+            }
+            $.each(weather.list[index], 
+                function(key,value){
+                    if (typeof value === "object") {
+                        string += key+" {<br>"
+                        $.each(value,function(key2, value2){
+                            if (typeof value2 === "object") {
+                                
+                                $.each(value2,function(key3, value3){
+                                    string+="<span style='width:60px;display:inline-block;vertical-align:middle;'></span><span class='key three'>"+key3+"</span> : <span class='key three'>"+value3+"</span><br>"})
+                            }else
+                                string+="<span style='width:40px;display:inline-block;vertical-align:middle;'></span><span class='key two'>"+key2+"</span> : <span class='key two'>"+value2+"</span><br>";
+                        
+                        })//end of value2 $.each
+                    }else
+                        string+="<span style='width:20px;display:inline-block;vertical-align:middle;'></span><span class='key'>"+key+"</span> : <span class='key'>"+value+"</span><br>";
+                })
+            
+            
+                
+        }// end of function
+        $('#result').append(string)
+        
+    }//end of function
+            , 'json')
+    
+    
+    //$('#result').append(JSON.parse('{"cod":"200","message":0.1936,"city":{"id":"4335045","name":"New Orleans","coord":{"lon":-90.0778,"lat":29.9537},"country":"United States of America","population":0},"cnt":3,"list":[{"dt":1422381600,"temp":{"day":16.03,"min":8.67,"max":16.03,"night":8.67,"eve":14.05,"morn":16.03},"pressure":1032.42,"humidity":55,"weather":[{"id":800,"main":"Clear","description":"sky is clear","icon":"01d"}],"speed":2.86,"deg":310,"clouds":0},{"dt":1422468000,"temp":{"day":13.32,"min":7.1,"max":13.88,"night":9.68,"eve":11.52,"morn":7.1},"pressure":1039.51,"humidity":66,"weather":[{"id":800,"main":"Clear","description":"sky is clear","icon":"01d"}],"speed":5,"deg":96,"clouds":0},{"dt":1422554400,"temp":{"day":19.08,"min":10.32,"max":20.12,"night":13.54,"eve":18.7,"morn":10.32},"pressure":1037.5,"humidity":62,"weather":[{"id":801,"main":"Clouds","description":"few clouds","icon":"02d"}],"speed":3.24,"deg":206,"clouds":12}]}'))
+</script>
+
+</body>
