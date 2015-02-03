@@ -104,7 +104,10 @@ function buildWeatherConditionMapping(weatherConditionData) {
       'precipitation': weatherConditionData[i][2],
 
       // Wind speed (e.g. above 5)
-      'wind': weatherConditionData[i][3]
+      'wind': weatherConditionData[i][3],
+      
+      // Days in the Future to look to
+      'daysInFuture' : parseInt(weatherConditionData[i][4])
     };
   }
   Logger.log('Weather condition mapping: %s', weatherConditionMapping);
@@ -200,10 +203,13 @@ function evaluateWeatherRules(weatherRules, weather) {
   var windspeed = [];
   var cloudiness = [];
   var matchesRule = false;
-  for(var i=0;i<DAYS_FORECAST&& i < weather.list.length;i++)
+  if (weatherRules.daysInFuture === undefined) {
+    weatherRules.daysInFuture = 0;
+    Logger.log(weatherRules.daysInFuture);
+  }
+  for(var i=weatherRules.daysInFuture;i<=weatherRules.daysInFuture+1&& i < weather.list.length;i++)
   {
     if ( weather.list[i].weather[0].main.toLowerCase().indexOf('rain') != -1) {
-
       precipitation[i] = 1;
     }else{
       precipitation[i] = 0; //0;

@@ -128,7 +128,8 @@
             'condition': 'rain',
             'temperature': "1 to 90",
             'precipitation': "above 0",
-            'wind': "above 0"
+            'wind': "above 0",
+            'daysInFuture': 1
         }
     weather =
         {
@@ -229,7 +230,7 @@
     ]
     }
        
-    assert.equal(evaluateWeatherRules(weatherRules, weather),true,"This is testing when expecting rain above 0 and it is" )
+    assert.equal(evaluateWeatherRules(weatherRules, weather),false,"This is testing when expecting rain above 0 and it isn't" )
     
 
     weatherRules =
@@ -237,7 +238,8 @@
             'condition': 'rain',
             'temperature': "1 to 90",
             'precipitation': "below 1",
-            'wind': "above 0"
+            'wind': "above 0",
+            'daysInFuture': 0
         }
     assert.equal(evaluateWeatherRules(weatherRules, weather),false,"testing if it evaluates false when looking for no rain, when it will rain" )
     weatherRules =
@@ -251,11 +253,22 @@
     weatherRules =
         {
             'condition': 'rain',
-            'temperature': "85 to 90",
+            'temperature': "1 to 90",
             'precipitation': "below 1",
             'wind': "above 90"
         }   
     assert.equal(evaluateWeatherRules(weatherRules, weather),false,"testing if it evaluates false when wind is different then it is looking for" )
+    weatherRules =
+        {
+            'condition': 'rain',
+            'temperature': "0 to 90",
+            'precipitation': "above 0",
+            'wind': "above 0",
+            'daysInFuture' : 1
+        }   
+    
+    assert.equal(evaluateWeatherRules(weatherRules, weather),true,"testing if it daysInFuture is set to one and expecting rain one day in the future, and it rains in one day." )
+
 
     });
   </script>
