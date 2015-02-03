@@ -205,7 +205,7 @@ function evaluateWeatherRules(weatherRules, weather) {
   var matchesRule = false;
   if (weatherRules.daysInFuture === undefined) {
     weatherRules.daysInFuture = 0;
-    Logger.log(weatherRules.daysInFuture);
+    
   }
   for(var i=weatherRules.daysInFuture;i<=weatherRules.daysInFuture+1&& i < weather.list.length;i++)
   {
