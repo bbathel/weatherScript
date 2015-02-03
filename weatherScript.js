@@ -1,13 +1,13 @@
 // Register for an API key at http://openweathermap.org/appid
 // and enter the key below.
-var OPEN_WEATHER_MAP_API_KEY = "INSERT_OPEN_WEATHER_MAP_API_KEY_HERE";
+var OPEN_WEATHER_MAP_API_KEY = "f0297e9f8e4573d5641bb8720bfafa0e";
 
 // Create a copy of http://goo.gl/SNE5H7 and enter the URL below.
-var SPREADSHEET_URL = 'INSERT_SPREADSHEET_URL_HERE';
+var SPREADSHEET_URL = 'https://docs.google.com/a/searchinfluence.com/spreadsheet/ccc?key=0All7Ng2pAyH8dFphTzczSHFkS1Bza29HeXJ3VjVsNnc';
 
 // A cache to store the weather for locations already lookedup earlier.
 var WEATHER_LOOKUP_CACHE = {};
-
+var DAYS_FORECAST =  7;
 
 /**
  * The code to execute when running the script.
@@ -21,8 +21,7 @@ function main() {
 
   // Convert the data into dictionaries for convenient usage.
   var campaignMapping = buildCampaignRulesMapping(campaignRuleData);
-  var weatherConditionMapping =
-      buildWeatherConditionMapping(weatherConditionData);
+  var weatherConditionMapping = buildWeatherConditionMapping(weatherConditionData);
   var locationMapping = buildLocationMapping(geoMappingData);
 
   // Apply the rules.
@@ -55,7 +54,7 @@ function getSheetData(spreadsheet, sheetIndex) {
  */
 function buildCampaignRulesMapping(campaignRulesData) {
   var campaignMapping = {};
-  for (var i = 0; i < campaignRulesData.length; i++) {
+  for (var i = 0; i < campaignRulesData.length; i++) {     
     // Skip rule if not enabled.
 
     if (campaignRulesData[i][4].toLowerCase() == 'yes') {
@@ -65,7 +64,7 @@ function buildCampaignRulesMapping(campaignRulesData) {
           'name': campaignName,
 
           // location for which this rule applies.
-          'location': campaignRulesData[i][1],
+          'location': 4335045,
 
           // the weather condition (e.g. Sunny)
           'condition': campaignRulesData[i][2],
@@ -96,7 +95,7 @@ function buildWeatherConditionMapping(weatherConditionData) {
     var weatherConditionName = weatherConditionData[i][0];
     weatherConditionMapping[weatherConditionName] = {
       // Condition name (e.g. Sunny)
-      'condition': weatherConditionName,
+      //'condition': weatherConditionName,
 
       // Temperature (e.g. 50 to 70)
       'temperature': weatherConditionData[i][1],
@@ -196,24 +195,26 @@ function evaluateWeatherRules(weatherRules, weather) {
   // for values returned by OpenWeatherMap API.
   var mm_to_inches = 0.0393701;
   var precipitation = [];
-  var days_forecasted = 7;
+  var weatherValue = "";
   var temperature = [];
   var windspeed = [];
   var cloudiness = [];
-  for(var i=0;i<days_forecasted;i++)
+  for(var i=0;i<DAYS_FORECAST;i++)
   {
-    if (weather.list[i].rain) {
-      precipitation[i] = weather.list[i].weather.rain*mm_to_inches;
+    if ( weather.list[i].weather[0].main.toLowerCase().indexOf('rain') != -1) {
+      precipitation[i] = 1;
+    }else{
+      precipitation[i] = 1; //0;
     }
-    temperature[i]= toFahrenheit(weather.list[i].temp.day);
-    windspeed[i] = weather.list[i].wind.speed;
-    cloudiness[i] = weather.list[i].clouds;
+    temperature[i]= toFahrenheit(weather.list[i].main.temp).toFixed(0);
+    windspeed[i] = weather.list[i].wind.speed.toFixed(2);
+    cloudiness[i] =weather.list[i].clouds.all;
+   
   }
-
-
-  return evaluateMatchRules(weatherRules.temperature, temperature) &&
-      evaluateMatchRules(weatherRules.precipitation, precipitation) &&
-      evaluateMatchRules(weatherRules.wind, windspeed);
+  Logger.log(evaluateMatchRules(weatherRules.temperature, temperature[0])+" "+evaluateMatchRules(weatherRules.precipitation, precipitation[0]) +" "+evaluateMatchRules(weatherRules.wind, windspeed[0]))
+    return evaluateMatchRules(weatherRules.temperature, temperature[0]) &&
+      evaluateMatchRules(weatherRules.precipitation, precipitation[0]) &&
+      evaluateMatchRules(weatherRules.wind, windspeed[0]);
 }
 
 /**
@@ -236,6 +237,7 @@ function evaluateMatchRules(condition, value) {
   }
   return false;
 }
+
 
 /**
  * Evaluates whether a value is below a threshold value.
@@ -321,9 +323,11 @@ function getWeather(location) {
   }
 
   var url = Utilities.formatString(
-      'http://api.openweathermap.org/data/2.5/weather?APPID=%s&q=%s',
+      'http://api.openweathermap.org/data/2.5/forecast?APPID=%s&id=%s&cnt=%s',
       encodeURIComponent(OPEN_WEATHER_MAP_API_KEY),
-      encodeURIComponent(location));
+      encodeURIComponent(location),
+      DAYS_FORECAST );
+  Logger.log("URL = "+url)
   var response = UrlFetchApp.fetch(url);
   if (response.getResponseCode() != 200) {
     throw Utilities.formatString(
@@ -371,7 +375,7 @@ function adjustBids(campaignName, geocodes, bidModifier) {
         Logger.log('Setting bidModifier = %s for campaign name = %s, ' +
             'geoCode = %s. Old bid modifier is %s.', bidModifier, campaignName,
             location.getId(), currentBidModifier);
-        location.setBidModifier(bidModifier);
+        //location.setBidModifier(bidModifier);
       }
     }
   }

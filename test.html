@@ -21,9 +21,34 @@
 </head>
 <body>
     <div id="result"></div>
+    <script>
+        
+        function matchesRange(condition, value) {
+  conditionParts = condition.replace('\w+', ' ').split(' ');
+   console.log(conditionParts);
+  if (conditionParts.length != 3) {
+    console.log(false+"1")
+    return false;
+  }
+
+  if (conditionParts[1] != 'to') {
+    console.log(false+"2")
+    return false;
+  }
+
+  if (conditionParts[0] <= value && value <= conditionParts[2]) {
+     console.log(true)
+    return true;
+  }
+  return false;
+}
+condition = "0 to 120";
+value = 50;
+matchesRange(condition, value)
+    </script>
 <script>
 
-    var url = 'http://api.openweathermap.org/data/2.5/forecast/daily?q=new_orleans&mode=json&units=imperial&cnt=15'
+    var url = 'http://api.openweathermap.org/data/2.5/forecast?APPID=f0297e9f8e4573d5641bb8720bfafa0e&id=4335045&units=imperial&cnt=3'//'http://api.openweathermap.org/data/2.5/forecast/daily?q=new_orleans&mode=json&units=imperial&cnt=15'
     var string='';
     var index=0;
     var json = {}
@@ -37,11 +62,11 @@
         for(;index<weather.list.length;index+=1){
             string+="<h1>day "+(index+1)+"</h1>";
             console.log("day "+(index+1)+" "+weather.list[index].weather[0].main)
-            console.log("      "+(weather.list[index].temp.day/**1.8 +32 */))
-            if (weather.list[index].rain) {
-                console.log("      rain = "+(weather.list[index].rain*mm_to_inches)+"in")
+            console.log("      "+(weather.list[index].main.temp/**1.8 +32 */))
+            if (weather.list[index].weather.main) {
+                console.log("      rain = "+(weather.list[index].weather.main))
             }else if (weather.list[index].clouds) {
-                console.log("      clouds = " +weather.list[index].clouds+"%");
+                console.log("      clouds = " +weather.list[index].clouds.all+"%");
             }
             $.each(weather.list[index], 
                 function(key,value){
