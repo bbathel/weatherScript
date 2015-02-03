@@ -95,7 +95,7 @@ function buildWeatherConditionMapping(weatherConditionData) {
     var weatherConditionName = weatherConditionData[i][0];
     weatherConditionMapping[weatherConditionName] = {
       // Condition name (e.g. Sunny)
-      //'condition': weatherConditionName,
+      'condition': weatherConditionName,
 
       // Temperature (e.g. 50 to 70)
       'temperature': weatherConditionData[i][1],
@@ -199,22 +199,26 @@ function evaluateWeatherRules(weatherRules, weather) {
   var temperature = [];
   var windspeed = [];
   var cloudiness = [];
+  var matchesRule = false;
   for(var i=0;i<DAYS_FORECAST;i++)
   {
     if ( weather.list[i].weather[0].main.toLowerCase().indexOf('rain') != -1) {
+      Logger.log('rain');
       precipitation[i] = 1;
     }else{
-      precipitation[i] = 1; //0;
+      precipitation[i] = 0; //0;
     }
     temperature[i]= toFahrenheit(weather.list[i].main.temp).toFixed(0);
     windspeed[i] = weather.list[i].wind.speed.toFixed(2);
     cloudiness[i] =weather.list[i].clouds.all;
-   
-  }
-  Logger.log(evaluateMatchRules(weatherRules.temperature, temperature[0])+" "+evaluateMatchRules(weatherRules.precipitation, precipitation[0]) +" "+evaluateMatchRules(weatherRules.wind, windspeed[0]))
-    return evaluateMatchRules(weatherRules.temperature, temperature[0]) &&
-      evaluateMatchRules(weatherRules.precipitation, precipitation[0]) &&
-      evaluateMatchRules(weatherRules.wind, windspeed[0]);
+     
+    if ( evaluateMatchRules(weatherRules.temperature, temperature[i]) && evaluateMatchRules(weatherRules.precipitation, precipitation[i]) && evaluateMatchRules(weatherRules.wind, windspeed[i])){
+        matchesRule=true;
+        break;
+      }//end if
+
+  }//end for
+  return matchesRule;
 }
 
 /**
@@ -297,16 +301,19 @@ function matchesRange(condition, value) {
   conditionParts = condition.replace('\w+', ' ').split(' ');
 
   if (conditionParts.length != 3) {
+  
     return false;
   }
 
   if (conditionParts[1] != 'to') {
+  
     return false;
   }
 
   if (conditionParts[0] <= value && value <= conditionParts[2]) {
     return true;
   }
+
   return false;
 }
 
