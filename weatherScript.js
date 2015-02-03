@@ -212,7 +212,9 @@ function evaluateWeatherRules(weatherRules, weather) {
     windspeed[i] = weather.list[i].wind.speed.toFixed(2);
     cloudiness[i] =weather.list[i].clouds.all;
      
-    if ( evaluateMatchRules(weatherRules.temperature, temperature[i]) && evaluateMatchRules(weatherRules.precipitation, precipitation[i]) && evaluateMatchRules(weatherRules.wind, windspeed[i])){
+    if ( evaluateMatchRules(weatherRules.temperature, temperature[i])
+        && evaluateMatchRules(weatherRules.precipitation, precipitation[i])
+        && evaluateMatchRules(weatherRules.wind, windspeed[i])){
         matchesRule=true;
         break;
       }//end if

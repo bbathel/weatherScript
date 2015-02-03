@@ -2,15 +2,260 @@
 <head>
   <meta charset="utf-8">
   <title>Test of WeatehrScript.js</title>
-  <link rel="stylesheet" href="//code.jquery.com/qunit/qunit-1.17.1.css">
+  <link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.17.1.css">
 </head>
 <body>
   <div id="qunit"></div>
   <div id="qunit-fixture"></div>
-  <script src="//code.jquery.com/qunit/qunit-1.17.1.js"></script>
+  <script src="http://code.jquery.com/qunit/qunit-1.17.1.js"></script>
+  <script src="file:///Users/bbathel/weatherscript/weatherscript/weatherScript.js"></script>
   <script>
+    var temp, rain, wind, weatherRules, weather;
     QUnit.test( "Test of WeatherScript.js", function( assert ) {
-      
+
+    weatherRules=
+        {
+            'condition': 'rain',
+            'temperature': "1 to 90",
+            'precipitation': "above 0",
+            'wind': "above 0"
+        }
+    weather =
+        {
+    "cod":"200",
+    "message":0.118,
+    "city":{
+       "id":4335045,
+       "name":"New Orleans",
+       "coord":{
+           "lon":-90.075073,
+           "lat":29.954651
+           },
+       "country":
+       "US",
+       "population":343829
+           },
+       "cnt":41,
+       'list':
+    [
+        {// not rainy
+            "dt":1422975600,
+            "main":
+                {
+                    "temp":50.67,
+                    "temp_min":44.74,
+                    "temp_max":50.67,
+                    "pressure":1041.02,
+                    "sea_level":1041.28,
+                    "grnd_level":1041.02,
+                    "humidity":71,
+                    "temp_kf":3.29
+                 },
+             "weather":
+                [{
+                  "id":804,
+                  "main":"Clouds",
+                  "description":"overcast clouds",
+                  "icon":"04d"
+                }],
+             "clouds":{
+                 "all":92
+                 },
+             "wind":{
+                 "speed":9.42,
+                 "deg":79.0021
+                 },
+             "sys":{
+                 "pod":"d"
+                 },
+             "dt_txt":"2015-02-03 15:00:00"
+        },
+   
+   
+   
+       /*{
+            "dt":1423094400,
+            "main":
+            {
+                "temp":269.81,
+                "temp_min":269.368,
+                "temp_max":269.81,
+                "pressure":1002.89,
+                "sea_level":1024.02,
+                "grnd_level":1002.89,
+                "humidity":94,
+                "temp_kf":0.45
+            },
+            "weather":
+                [{
+                    "id":500,
+                    "main":"Rain",
+                    "description":"light rain",
+                    "icon":"10n"
+                }],
+            "clouds":
+                {
+                    "all":88
+                },
+            "wind":
+                {
+                    "speed":4.66,
+                    "deg":338.003
+                },
+            "snow":
+                {
+                    "3h":0
+                },
+            "rain":
+                {
+                    "3h":2
+                },
+            "sys":
+                {
+                    "pod":"n"
+                },
+            "dt_txt":"2015-02-05 00:00:00"
+        }*/
+    ]
+    }
+        
+        
+        assert.equal(evaluateWeatherRules(weatherRules, weather),false,"This is looking for rain above 0 when rain = 0" )
+        
+        
+            weatherRules=
+        {
+            'condition': 'rain',
+            'temperature': "1 to 90",
+            'precipitation': "above 0",
+            'wind': "above 0"
+        }
+    weather =
+        {
+    "cod":"200",
+    "message":0.118,
+    "city":{
+       "id":4335045,
+       "name":"New Orleans",
+       "coord":{
+           "lon":-90.075073,
+           "lat":29.954651
+           },
+       "country":
+       "US",
+       "population":343829
+           },
+       "cnt":41,
+       'list':
+    [
+        {// not rainy
+            "dt":1422975600,
+            "main":
+                {
+                    "temp":50.67,
+                    "temp_min":44.74,
+                    "temp_max":50.67,
+                    "pressure":1041.02,
+                    "sea_level":1041.28,
+                    "grnd_level":1041.02,
+                    "humidity":71,
+                    "temp_kf":3.29
+                 },
+             "weather":
+                [{
+                  "id":804,
+                  "main":"Clouds",
+                  "description":"overcast clouds",
+                  "icon":"04d"
+                }],
+             "clouds":{
+                 "all":92
+                 },
+             "wind":{
+                 "speed":9.42,
+                 "deg":79.0021
+                 },
+             "sys":{
+                 "pod":"d"
+                 },
+             "dt_txt":"2015-02-03 15:00:00"
+        },
+   
+   
+   
+       {//rainy
+            "dt":1423094400,
+            "main":
+            {
+                "temp":269.81,
+                "temp_min":269.368,
+                "temp_max":269.81,
+                "pressure":1002.89,
+                "sea_level":1024.02,
+                "grnd_level":1002.89,
+                "humidity":94,
+                "temp_kf":0.45
+            },
+            "weather":
+                [{
+                    "id":500,
+                    "main":"Rain",
+                    "description":"light rain",
+                    "icon":"10n"
+                }],
+            "clouds":
+                {
+                    "all":88
+                },
+            "wind":
+                {
+                    "speed":4.66,
+                    "deg":338.003
+                },
+            "snow":
+                {
+                    "3h":0
+                },
+            "rain":
+                {
+                    "3h":2
+                },
+            "sys":
+                {
+                    "pod":"n"
+                },
+            "dt_txt":"2015-02-05 00:00:00"
+        }
+    ]
+    }
+       
+    assert.equal(evaluateWeatherRules(weatherRules, weather),true,"This is testing when expecting rain above 0 and it is" )
+    
+
+    weatherRules =
+        {
+            'condition': 'rain',
+            'temperature': "1 to 90",
+            'precipitation': "below 1",
+            'wind': "above 0"
+        }
+    assert.equal(evaluateWeatherRules(weatherRules, weather),false,"testing if it evaluates false when looking for no rain, when it will rain" )
+    weatherRules =
+        {
+            'condition': 'rain',
+            'temperature': "85 to 90",
+            'precipitation': "below 1",
+            'wind': "above 0"
+        }
+    assert.equal(evaluateWeatherRules(weatherRules, weather),false,"testing if it evaluates false when temperature is different then it is looking for" )
+    weatherRules =
+        {
+            'condition': 'rain',
+            'temperature': "85 to 90",
+            'precipitation': "below 1",
+            'wind': "above 90"
+        }   
+    assert.equal(evaluateWeatherRules(weatherRules, weather),false,"testing if it evaluates false when wind is different then it is looking for" )
 
     });
   </script>
