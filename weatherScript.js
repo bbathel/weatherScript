@@ -200,10 +200,10 @@ function evaluateWeatherRules(weatherRules, weather) {
   var windspeed = [];
   var cloudiness = [];
   var matchesRule = false;
-  for(var i=0;i<DAYS_FORECAST;i++)
+  for(var i=0;i<DAYS_FORECAST&& i < weather.list.length;i++)
   {
     if ( weather.list[i].weather[0].main.toLowerCase().indexOf('rain') != -1) {
-      Logger.log('rain');
+
       precipitation[i] = 1;
     }else{
       precipitation[i] = 0; //0;
