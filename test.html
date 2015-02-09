@@ -21,31 +21,7 @@
 </head>
 <body>
     <div id="result"></div>
-    <script>
-        
-        function matchesRange(condition, value) {
-  conditionParts = condition.replace('\w+', ' ').split(' ');
-   console.log(conditionParts);
-  if (conditionParts.length != 3) {
-    console.log(false+"1")
-    return false;
-  }
 
-  if (conditionParts[1] != 'to') {
-    console.log(false+"2")
-    return false;
-  }
-
-  if (conditionParts[0] <= value && value <= conditionParts[2]) {
-     console.log(true)
-    return true;
-  }
-  return false;
-}
-condition = "0 to 120";
-value = 50;
-matchesRange(condition, value)
-    </script>
 <script>
 
     var url = 'http://api.openweathermap.org/data/2.5/forecast?APPID=f0297e9f8e4573d5641bb8720bfafa0e&id=4335045&units=imperial&cnt=3'//'http://api.openweathermap.org/data/2.5/forecast/daily?q=new_orleans&mode=json&units=imperial&cnt=15'

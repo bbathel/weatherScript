@@ -390,7 +390,7 @@ function adjustBids(campaignName, geocodes, bidModifier) {
         Logger.log('Setting bidModifier = %s for campaign name = %s, ' +
             'geoCode = %s. Old bid modifier is %s.', bidModifier, campaignName,
             location.getId(), currentBidModifier);
-        //location.setBidModifier(bidModifier);
+            location.setBidModifier(bidModifier);
       }
     }
   }
