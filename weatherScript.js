@@ -8,6 +8,7 @@ var SPREADSHEET_URL = 'https://docs.google.com/a/searchinfluence.com/spreadsheet
 // A cache to store the weather for locations already lookedup earlier.
 var WEATHER_LOOKUP_CACHE = {};
 var DAYS_FORECAST =  7;
+var weatherConditionList = ["200","201","202","210","211","212","221","230","231","232","300","301","302","310","311","312","313","314","321","500","501","502","503","504","511","520","521","522","531","600","601","602","611","612","615","616","620","621","622","701","711","721","731","741","751","761","762","771","781","800","801","802","803","804","900","901","902","903","904","905","906","951","952","953","954","955","956","957","958","959","960","961","962"];
 
 /**
  * The code to execute when running the script.
@@ -107,7 +108,10 @@ function buildWeatherConditionMapping(weatherConditionData) {
       'wind': weatherConditionData[i][3],
       
       // Days in the Future to look to
-      'daysInFuture' : parseInt(weatherConditionData[i][4])
+      'daysInFuture' : parseInt(weatherConditionData[i][4]),
+      
+      // Weather codes that make up this condition
+      'WeatherCode' : weatherConditionData[i][5]
     };
   }
   Logger.log('Weather condition mapping: %s', weatherConditionMapping);
@@ -205,11 +209,10 @@ function evaluateWeatherRules(weatherRules, weather) {
   var matchesRule = false;
   if (weatherRules.daysInFuture === undefined) {
     weatherRules.daysInFuture = 0;
-    
   }
   for(var i=weatherRules.daysInFuture;i<=weatherRules.daysInFuture+1&& i < weather.list.length;i++)
   {
-    if ( weather.list[i].weather[0].main.toLowerCase().indexOf('rain') != -1) {
+    if (weather.list[i].weather[0].main.toLowerCase().indexOf('rain') != -1) {
       precipitation[i] = 1;
     }else{
       precipitation[i] = 0; //0;
@@ -217,10 +220,11 @@ function evaluateWeatherRules(weatherRules, weather) {
     temperature[i]= toFahrenheit(weather.list[i].main.temp).toFixed(0);
     windspeed[i] = weather.list[i].wind.speed.toFixed(2);
     cloudiness[i] =weather.list[i].clouds.all;
-     
+    weatherCode = weather.list[i].weather[0].id.toString();
     if ( evaluateMatchRules(weatherRules.temperature, temperature[i])
         && evaluateMatchRules(weatherRules.precipitation, precipitation[i])
-        && evaluateMatchRules(weatherRules.wind, windspeed[i])){
+        && evaluateMatchRules(weatherRules.wind, windspeed[i])
+        && evaluateMatchRules(weatherRules.WeatherCode, weatherCode)){
         matchesRule=true;
         break;
       }//end if
@@ -240,7 +244,7 @@ function evaluateMatchRules(condition, value) {
   if (condition == '') {
     return true;
   }
-  var rules = [matchesBelow, matchesAbove, matchesRange];
+  var rules = [matchesBelow, matchesAbove, matchesRange, matchesList];
 
   for (var i = 0; i < rules.length; i++) {
     if (rules[i](condition, value)) {
@@ -325,6 +329,28 @@ function matchesRange(condition, value) {
   return false;
 }
 
+
+/**
+ *Evaluates whether a value is within the list of rainy values set
+ * @param {string} condition The condition to be checked (e.g. 5 to 18).
+ * @param {number} value The value to be checked.
+ * @return {boolean} True if the value is in the desired range, false otherwise.
+ *
+ */
+function matchesList(condition, value){
+  conditionParts = condition.split(',');
+  for(var i=0;i<conditionParts.length;i++){
+    for(var j=0;j<weatherConditionList.length;j++){
+      if (conditionParts[i] === weatherConditionList[j] && value === weatherConditionList[j]) {
+        return true;
+      }
+    }
+  }
+  return false;
+  
+}
+
+
 /**
  * Retrieves the weather for a given location, using the OpenWeatherMap API.
  * @param {string} location The location to get the weather for.
@@ -390,7 +416,11 @@ function adjustBids(campaignName, geocodes, bidModifier) {
         Logger.log('Setting bidModifier = %s for campaign name = %s, ' +
             'geoCode = %s. Old bid modifier is %s.', bidModifier, campaignName,
             location.getId(), currentBidModifier);
+        if (bidModefier === -1) {
+            campaign.pause();
+        }else{
             location.setBidModifier(bidModifier);
+        }
       }
     }
   }

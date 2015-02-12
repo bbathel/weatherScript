@@ -37,7 +37,7 @@
         //string += JSON.stringify(weather)
         for(;index<weather.list.length;index+=1){
             string+="<h1>day "+(index+1)+"</h1>";
-            console.log("day "+(index+1)+" "+weather.list[index].weather[0].main)
+            console.log("day "+(index+1)+" "+weather.list[index].weather[0].id)
             console.log("      "+(weather.list[index].main.temp/**1.8 +32 */))
             if (weather.list[index].weather.main) {
                 console.log("      rain = "+(weather.list[index].weather.main))

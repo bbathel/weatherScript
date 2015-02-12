@@ -18,7 +18,8 @@
             'condition': 'rain',
             'temperature': "1 to 90",
             'precipitation': "above 0",
-            'wind': "above 0"
+            'wind': "above 0",
+            'WeatherCode' : '500'
         }
     weather =
         {
@@ -129,7 +130,8 @@
             'temperature': "1 to 90",
             'precipitation': "above 0",
             'wind': "above 0",
-            'daysInFuture': 1
+            'daysInFuture': 1,
+            'WeatherCode' : '500'
         }
     weather =
         {
@@ -239,7 +241,8 @@
             'temperature': "1 to 90",
             'precipitation': "below 1",
             'wind': "above 0",
-            'daysInFuture': 0
+            'daysInFuture': 0,
+            'WeatherCode' : '500'
         }
     assert.equal(evaluateWeatherRules(weatherRules, weather),false,"testing if it evaluates false when looking for no rain, when it will rain" )
     weatherRules =
@@ -247,7 +250,8 @@
             'condition': 'rain',
             'temperature': "85 to 90",
             'precipitation': "below 1",
-            'wind': "above 0"
+            'wind': "above 0",
+            'WeatherCode' : '500'
         }
     assert.equal(evaluateWeatherRules(weatherRules, weather),false,"testing if it evaluates false when temperature is different then it is looking for" )
     weatherRules =
@@ -255,7 +259,8 @@
             'condition': 'rain',
             'temperature': "1 to 90",
             'precipitation': "below 1",
-            'wind': "above 90"
+            'wind': "above 90",
+            'WeatherCode' : '500'
         }   
     assert.equal(evaluateWeatherRules(weatherRules, weather),false,"testing if it evaluates false when wind is different then it is looking for" )
     weatherRules =
@@ -264,13 +269,15 @@
             'temperature': "0 to 90",
             'precipitation': "above 0",
             'wind': "above 0",
-            'daysInFuture' : 1
+            'daysInFuture' : 1,
+            'WeatherCode' : '500,201'
         }   
-    
+      console.log(weatherRules.WeatherCode);
     assert.equal(evaluateWeatherRules(weatherRules, weather),true,"testing if it daysInFuture is set to one and expecting rain one day in the future, and it rains in one day." )
 
 
     });
+    
   </script>
 </body>
 </html>
