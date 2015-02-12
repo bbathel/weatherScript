@@ -8,6 +8,7 @@ var SPREADSHEET_URL = 'https://docs.google.com/a/searchinfluence.com/spreadsheet
 // A cache to store the weather for locations already lookedup earlier.
 var WEATHER_LOOKUP_CACHE = {};
 var DAYS_FORECAST =  7;
+//this is a list of all the acceptable weather codes according to the open weather map api
 var weatherConditionList = ["200","201","202","210","211","212","221","230","231","232","300","301","302","310","311","312","313","314","321","500","501","502","503","504","511","520","521","522","531","600","601","602","611","612","615","616","620","621","622","701","711","721","731","741","751","761","762","771","781","800","801","802","803","804","900","901","902","903","904","905","906","951","952","953","954","955","956","957","958","959","960","961","962"];
 
 /**
@@ -174,7 +175,12 @@ function applyRulesForCampaign(campaignName, campaignRules, locationMapping,
           'weatherName = %s,weatherRules = %s, noticed weather = %s.',
           campaignRule.name, campaignRule.location,
           weatherConditionName, weatherConditionRules, weather);
-      bidModifier = campaignRule.bidModifier;
+      //Set bid modifier as off for the weather condition to pause for that condition
+      if (campaignRule.bidModifier === "off") {
+        bidModifier = -1;
+      }else{
+        bidModifier = campaignRule.bidModifier;
+      }
       adjustBids(campaignName, locationDetails.geoCodes, bidModifier);
     }
   }
@@ -416,9 +422,17 @@ function adjustBids(campaignName, geocodes, bidModifier) {
         Logger.log('Setting bidModifier = %s for campaign name = %s, ' +
             'geoCode = %s. Old bid modifier is %s.', bidModifier, campaignName,
             location.getId(), currentBidModifier);
+        
+        /*if the bidmodifier is set to negative 1 then it will pause the campaign
+         *if the campaign is already paused and the bidmodifier isn't negative it starts the
+         *campaign again
+         */
         if (bidModefier === -1) {
             campaign.pause();
         }else{
+            if (campaign.isPaused()) {
+              campaign.enable();
+            }
             location.setBidModifier(bidModifier);
         }
       }
