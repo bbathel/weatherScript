@@ -417,8 +417,8 @@ function adjustBids(campaignName, geocodes, bidModifier) {
 
       // Apply the bid modifier only if the campaign has a custom targeting
       // for this geo location.
-      if (geocodes.indexOf(location.getId()) != -1 &&
-          currentBidModifier != bidModifier) {
+      if (geocodes.indexOf(location.getId()) != -1 /*&&
+          currentBidModifier != bidModifier*/) {
         Logger.log('Setting bidModifier = %s for campaign name = %s, ' +
             'geoCode = %s. Old bid modifier is %s.', bidModifier, campaignName,
             location.getId(), currentBidModifier);
@@ -427,14 +427,13 @@ function adjustBids(campaignName, geocodes, bidModifier) {
          *if the campaign is already paused and the bidmodifier isn't negative it starts the
          *campaign again
          */
-        if (bidModefier === -1) {
-            campaign.pause();
-        }else{
-            if (campaign.isPaused()) {
-              campaign.enable();
-            }
+ 
+            campaign.enable();
             location.setBidModifier(bidModifier);
+        if(bidModifier == -1){
+          campaign.pause();
         }
+        
       }
     }
   }
