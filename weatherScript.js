@@ -176,11 +176,9 @@ function applyRulesForCampaign(campaignName, campaignRules, locationMapping,
           campaignRule.name, campaignRule.location,
           weatherConditionName, weatherConditionRules, weather);
       //Set bid modifier as off for the weather condition to pause for that condition
-      if (campaignRule.bidModifier === "off") {
-        bidModifier = -1;
-      }else{
+
         bidModifier = campaignRule.bidModifier;
-      }
+      
       adjustBids(campaignName, locationDetails.geoCodes, bidModifier);
     }
   }
@@ -223,10 +221,14 @@ function evaluateWeatherRules(weatherRules, weather) {
     }else{
       precipitation[i] = 0; //0;
     }
-    temperature[i]= toFahrenheit(weather.list[i].main.temp).toFixed(0);
-    windspeed[i] = weather.list[i].wind.speed.toFixed(2);
-    cloudiness[i] =weather.list[i].clouds.all;
+    temperature[i]= toFahrenheit(weather.list[i].temp['day']);
+    //Logger.log("temp "+toFahrenheit(weather.list[i].temp['day']))
+    windspeed[i] = weather.list[i].speed.toFixed(2);
+    //Logger.log("wind "+weather.list[i].speed.toFixed(2))
+    cloudiness[i] = weather.list[i].clouds;
+    //Logger.log("Cloud "+weather.list[i].clouds)
     weatherCode = weather.list[i].weather[0].id.toString();
+    //Logger.log("Weather Code "+weather.list[i].weather[0].id.toString())
     if ( evaluateMatchRules(weatherRules.temperature, temperature[i])
         && evaluateMatchRules(weatherRules.precipitation, precipitation[i])
         && evaluateMatchRules(weatherRules.wind, windspeed[i])
@@ -370,7 +372,7 @@ function getWeather(location) {
   }
 
   var url = Utilities.formatString(
-      'http://api.openweathermap.org/data/2.5/forecast?APPID=%s&id=%s&cnt=%s',
+      'http://api.openweathermap.org/data/2.5/forecast/daily?APPID=%s&id=%s&cnt=%s',
       encodeURIComponent(OPEN_WEATHER_MAP_API_KEY),
       encodeURIComponent(location),
       DAYS_FORECAST );
@@ -428,8 +430,9 @@ function adjustBids(campaignName, geocodes, bidModifier) {
          *campaign again
          */
  
-            campaign.enable();
-            location.setBidModifier(bidModifier);
+        campaign.enable();
+        location.setBidModifier(bidModifier);
+        Logger.log("bidmodifier set to "+ bidModifier)
         if(bidModifier == -1){
           campaign.pause();
         }
