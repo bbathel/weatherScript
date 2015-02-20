@@ -77,7 +77,7 @@ function buildCampaignRulesMapping(campaignRulesData) {
       campaignMapping[campaignName] = campaignRules;
     }
   }
-  Logger.log('Campaign Mapping: %s', campaignMapping);
+  //Logger.log('Campaign Mapping: %s', campaignMapping);
   return campaignMapping;
 }
 
@@ -115,7 +115,7 @@ function buildWeatherConditionMapping(weatherConditionData) {
       'WeatherCode' : weatherConditionData[i][5]
     };
   }
-  Logger.log('Weather condition mapping: %s', weatherConditionMapping);
+  //Logger.log('Weather condition mapping: %s', weatherConditionMapping);
   return weatherConditionMapping;
 }
 
@@ -138,7 +138,7 @@ function buildLocationMapping(geoTargetData) {
     locationDetails.geoCodes.push(geoTargetData[i][1]);
     locationMapping[locationName] = locationDetails;
   }
-  Logger.log('Location Mapping: %s', locationMapping);
+  //Logger.log('Location Mapping: %s', locationMapping);
   return locationMapping;
 }
 
@@ -163,7 +163,7 @@ function applyRulesForCampaign(campaignName, campaignRules, locationMapping,
     // Get the weather for the required location.
     var locationDetails = locationMapping[campaignRule.location];
     var weather = getWeather(campaignRule.location);
-    Logger.log('Weather for %s: %s', locationDetails, weather);
+    //Logger.log('Weather for %s: %s', locationDetails, weather);
 
     // Get the weather rules to be checked.
     var weatherConditionName = campaignRule.condition;
@@ -365,7 +365,7 @@ function matchesList(condition, value){
  */
 function getWeather(location) {
   if (location in WEATHER_LOOKUP_CACHE) {
-    Logger.log('Cache hit...');
+    //Logger.log('Cache hit...');
     return WEATHER_LOOKUP_CACHE[location];
   }
 
