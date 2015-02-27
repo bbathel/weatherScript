@@ -1,7 +1,7 @@
 // Register for an API key at http://openweathermap.org/appid
 // and enter the key below.
 var OPEN_WEATHER_MAP_API_KEY = "f0297e9f8e4573d5641bb8720bfafa0e";
-
+//var console = Logger;
 // Create a copy of http://goo.gl/SNE5H7 and enter the URL below.
 var SPREADSHEET_URL = 'https://docs.google.com/a/searchinfluence.com/spreadsheet/ccc?key=0All7Ng2pAyH8dFphTzczSHFkS1Bza29HeXJ3VjVsNnc';
 
@@ -10,7 +10,7 @@ var WEATHER_LOOKUP_CACHE = {};
 var DAYS_FORECAST =  7;
 //this is a list of all the acceptable weather codes according to the open weather map api
 var weatherConditionList = ["200","201","202","210","211","212","221","230","231","232","300","301","302","310","311","312","313","314","321","500","501","502","503","504","511","520","521","522","531","600","601","602","611","612","615","616","620","621","622","701","711","721","731","741","751","761","762","771","781","800","801","802","803","804","900","901","902","903","904","905","906","951","952","953","954","955","956","957","958","959","960","961","962"];
-
+var COUNTER=0;
 /**
  * The code to execute when running the script.
  */
@@ -93,7 +93,7 @@ function buildCampaignRulesMapping(campaignRulesData) {
 function buildWeatherConditionMapping(weatherConditionData) {
   var weatherConditionMapping = {};
 
-  for (var i = 0; i < weatherConditionData.length; i++) {
+  for (var i = 1; i < weatherConditionData.length; i++) {
     var weatherConditionName = weatherConditionData[i][0];
     weatherConditionMapping[weatherConditionName] = {
       // Condition name (e.g. Sunny)
@@ -103,17 +103,20 @@ function buildWeatherConditionMapping(weatherConditionData) {
       'temperature': weatherConditionData[i][1],
 
       // Precipitation (e.g. below 70)
-      'precipitation': weatherConditionData[i][2],
+      //'precipitation': weatherConditionData[i][2],
 
       // Wind speed (e.g. above 5)
       'wind': weatherConditionData[i][3],
       
       // Days in the Future to look to
-      'daysInFuture' : parseInt(weatherConditionData[i][4]),
+      'daysInFuture' : Math.round(weatherConditionData[i][4]),//parseInt(weatherConditionData[i][4]),
       
       // Weather codes that make up this condition
       'WeatherCode' : weatherConditionData[i][5]
     };
+    
+
+
   }
   //Logger.log('Weather condition mapping: %s', weatherConditionMapping);
   return weatherConditionMapping;
@@ -156,6 +159,7 @@ function buildLocationMapping(geoTargetData) {
  */
 function applyRulesForCampaign(campaignName, campaignRules, locationMapping,
                                weatherConditionMapping) {
+  //Logger.log("Number of Rules " + campaignRules.length);
   for (var i = 0; i < campaignRules.length; i++) {
     var bidModifier = 1;
     var campaignRule = campaignRules[i];
@@ -168,8 +172,13 @@ function applyRulesForCampaign(campaignName, campaignRules, locationMapping,
     // Get the weather rules to be checked.
     var weatherConditionName = campaignRule.condition;
     var weatherConditionRules = weatherConditionMapping[weatherConditionName];
-
-    // Evaluate the weather rules.
+    
+    for(var key in weatherConditionRules) {
+      var value = weatherConditionRules[key];
+      //Logger.log(key + " : " + value + " vs actual " + " "  )
+      
+  }//Logger.log(COUNTER++ + "\n================================================================")
+  // Evaluate the weather rules.
     if (evaluateWeatherRules(weatherConditionRules, weather)) {
       Logger.log('Matching Rule found: Campaign Name = %s, location = %s, ' +
           'weatherName = %s,weatherRules = %s, noticed weather = %s.',
@@ -178,7 +187,7 @@ function applyRulesForCampaign(campaignName, campaignRules, locationMapping,
       //Set bid modifier as off for the weather condition to pause for that condition
 
         bidModifier = campaignRule.bidModifier;
-      
+        Logger.log(bidModifier)
       adjustBids(campaignName, locationDetails.geoCodes, bidModifier);
     }
   }
@@ -211,10 +220,12 @@ function evaluateWeatherRules(weatherRules, weather) {
   var windspeed = [];
   var cloudiness = [];
   var matchesRule = false;
-  if (weatherRules.daysInFuture === undefined) {
+  
+ 
+  if (weatherRules.hasOwnProperty('daysInFuture') && typeof weatherRules.daysInFuture === undefined) {
     weatherRules.daysInFuture = 0;
   }
-  for(var i=weatherRules.daysInFuture;i<=weatherRules.daysInFuture+1&& i < weather.list.length;i++)
+  for(var i=weatherRules.daysInFuture;i<=weatherRules.daysInFuture && i < weather.list.length;i++)
   {
     if (weather.list[i].weather[0].main.toLowerCase().indexOf('rain') != -1) {
       precipitation[i] = 1;
@@ -230,7 +241,7 @@ function evaluateWeatherRules(weatherRules, weather) {
     weatherCode = weather.list[i].weather[0].id.toString();
     //Logger.log("Weather Code "+weather.list[i].weather[0].id.toString())
     if ( evaluateMatchRules(weatherRules.temperature, temperature[i])
-        && evaluateMatchRules(weatherRules.precipitation, precipitation[i])
+        //&& evaluateMatchRules(weatherRules.precipitation, precipitation[i])
         && evaluateMatchRules(weatherRules.wind, windspeed[i])
         && evaluateMatchRules(weatherRules.WeatherCode, weatherCode)){
         matchesRule=true;
@@ -406,21 +417,22 @@ function getWeather(location) {
  */
 function adjustBids(campaignName, geocodes, bidModifier) {
   // Get the campaign.
-  var campaignIterator = AdWordsApp.campaigns().withCondition(
-      Utilities.formatString('CampaignName = "%s"', campaignName)).get();
+  var campaignIterator = AdWordsApp.campaigns().withCondition(Utilities.formatString('CampaignName = "%s"', campaignName)).get();
+  console.log("inside of adjust bids")
   while (campaignIterator.hasNext()) {
     var campaign = campaignIterator.next();
-
     // Get the targeted locations.
     var locations = campaign.targeting().targetedLocations().get();
+    console.log("locations: " +locations);
     while (locations.hasNext()) {
       var location = locations.next();
       var currentBidModifier = location.getBidModifier().toFixed(2);
-
+      Logger.log("more inside of adjust bids")
       // Apply the bid modifier only if the campaign has a custom targeting
       // for this geo location.
-      if (geocodes.indexOf(location.getId()) != -1 /*&&
-          currentBidModifier != bidModifier*/) {
+
+      if (geocodes.indexOf(location.getId()) //!= -1
+          /*&& currentBidModifier != bidModifier*/) {
         Logger.log('Setting bidModifier = %s for campaign name = %s, ' +
             'geoCode = %s. Old bid modifier is %s.', bidModifier, campaignName,
             location.getId(), currentBidModifier);
@@ -429,7 +441,7 @@ function adjustBids(campaignName, geocodes, bidModifier) {
          *if the campaign is already paused and the bidmodifier isn't negative it starts the
          *campaign again
          */
- 
+        Logger.log("bidmodifier set to "+ bidModifier)
         campaign.enable();
         location.setBidModifier(bidModifier);
         Logger.log("bidmodifier set to "+ bidModifier)

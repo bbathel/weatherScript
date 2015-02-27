@@ -24,7 +24,7 @@
 
 <script>
 
-    var url = 'http://api.openweathermap.org/data/2.5/forecast?APPID=f0297e9f8e4573d5641bb8720bfafa0e&id=4335045&units=imperial&cnt=3'//'http://api.openweathermap.org/data/2.5/forecast/daily?q=new_orleans&mode=json&units=imperial&cnt=15'
+    var url = 'http://api.openweathermap.org/data/2.5/forecast/daily?APPID=f0297e9f8e4573d5641bb8720bfafa0e&id=4335045&cnt=7'//'http://api.openweathermap.org/data/2.5/forecast/daily?q=new_orleans&mode=json&units=imperial&cnt=15'
     var string='';
     var index=0;
     var json = {}
@@ -38,7 +38,7 @@
         for(;index<weather.list.length;index+=1){
             string+="<h1>day "+(index+1)+"</h1>";
             console.log("day "+(index+1)+" "+weather.list[index].weather[0].id)
-            console.log("      "+(weather.list[index].main.temp/**1.8 +32 */))
+            console.log("      "+((weather.list[index].temp.day-273)*1.8 +32 ))
             if (weather.list[index].weather.main) {
                 console.log("      rain = "+(weather.list[index].weather.main))
             }else if (weather.list[index].clouds) {
