@@ -79,7 +79,7 @@
                     "humidity": 92,
                     "weather": [
                       {
-                        "id": 800,
+                        "id": 500,
                         "main": "Clear",
                         "description": "sky is clear",
                         "icon": "01d"
@@ -110,7 +110,7 @@
                       }
                     ],
                     "speed": 7.91,
-                    "deg": 117,
+                    "deg": 80,
                     "clouds": 44
                   },
                   {//day 5
@@ -256,6 +256,30 @@
       console.log(weatherRules.WeatherCode);
     /* test 6 */
     assert.equal(evaluateWeatherRules(weatherRules, weather),true,"testing if it daysInFuture is set to one and expecting rain one day in the future, and it rains in one day." )
+     weatherRules =
+        {
+            'condition': 'rain',
+            'temperature': "0 to 90",
+            'precipitation': "above 0",
+            'wind': "above 0",
+            'daysInFuture' : 2,
+            'WeatherCode' : '500,201'
+        }   
+      console.log(weatherRules.WeatherCode);
+    /* test 6 */
+    assert.equal(evaluateWeatherRules(weatherRules, weather),true,"testing if it daysInFuture is set to two and expecting rain one day in the future, and it rains in two day." )
+    weatherRules =
+        {
+            'condition': 'rain',
+            'temperature': "0 to 90",
+            'precipitation': "above 0",
+            'wind': "above 0",
+            'daysInFuture' : 3,
+            'WeatherCode' : 'not 500,502'
+        }   
+      console.log(weatherRules.WeatherCode);
+    /* test 6 */
+    assert.equal(evaluateWeatherRules(weatherRules, weather),true,"testing if it daysInFuture is set to 3 and not expecting rain 3 days in the future, and it doesn't rain in 3 day." )
 
 
     });

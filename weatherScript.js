@@ -222,7 +222,7 @@ function evaluateWeatherRules(weatherRules, weather) {
   var matchesRule = false;
   
  
-  if (weatherRules.hasOwnProperty('daysInFuture') && typeof weatherRules.daysInFuture === undefined) {
+  if ((weatherRules.hasOwnProperty('daysInFuture')===false) || (typeof weatherRules.daysInFuture === undefined)) {
     weatherRules.daysInFuture = 0;
   }
   for(var i=weatherRules.daysInFuture;i<=weatherRules.daysInFuture && i < weather.list.length;i++)
@@ -263,7 +263,7 @@ function evaluateMatchRules(condition, value) {
   if (condition == '') {
     return true;
   }
-  var rules = [matchesBelow, matchesAbove, matchesRange, matchesList];
+  var rules = [matchesBelow, matchesAbove, matchesRange, matchesList, matchesNotList];
 
   for (var i = 0; i < rules.length; i++) {
     if (rules[i](condition, value)) {
@@ -282,18 +282,22 @@ function evaluateMatchRules(condition, value) {
  * condition, false otherwise.
  */
 function matchesBelow(condition, value) {
-  conditionParts = condition.split(' ');
-
-  if (conditionParts.length != 2) {
-    return false;
-  }
-
-  if (conditionParts[0] != 'below') {
-    return false;
-  }
-
-  if (value < conditionParts[1]) {
-    return true;
+  if (condition.indexOf('not') === -1)
+  {
+    //console.log('Inside MatchesBelow')
+    conditionParts = condition.split(' ');
+  
+    if (conditionParts.length != 2) {
+      return false;
+    }
+  
+    if (conditionParts[0] != 'below') {
+      return false;
+    }
+  
+    if (value < conditionParts[1]) {
+      return true;
+    }
   }
   return false;
 }
@@ -306,18 +310,22 @@ function matchesBelow(condition, value) {
  *     condition, false otherwise.
  */
 function matchesAbove(condition, value) {
-  conditionParts = condition.split(' ');
-
-  if (conditionParts.length != 2) {
-    return false;
-  }
-
-  if (conditionParts[0] != 'above') {
-    return false;
-  }
-
-  if (value > conditionParts[1]) {
-    return true;
+  if (condition.indexOf('not') === -1)
+  {
+    //console.log('Inside MatchesAbove')
+    conditionParts = condition.split(' ');
+  
+    if (conditionParts.length != 2) {
+      return false;
+    }
+  
+    if (conditionParts[0] != 'above') {
+      return false;
+    }
+  
+    if (value > conditionParts[1]) {
+      return true;
+    }
   }
   return false;
 }
@@ -329,20 +337,24 @@ function matchesAbove(condition, value) {
  * @return {boolean} True if the value is in the desired range, false otherwise.
  */
 function matchesRange(condition, value) {
-  conditionParts = condition.replace('\w+', ' ').split(' ');
-
-  if (conditionParts.length != 3) {
+  if (condition.indexOf('not') === -1)
+  {
+    //console.log('Inside MatchesRange')
+    conditionParts = condition.replace('\w+', ' ').split(' ');
   
-    return false;
-  }
-
-  if (conditionParts[1] != 'to') {
+    if (conditionParts.length != 3) {
+    
+      return false;
+    }
   
-    return false;
-  }
-
-  if (conditionParts[0] <= value && value <= conditionParts[2]) {
-    return true;
+    if (conditionParts[1] != 'to') {
+    
+      return false;
+    }
+  
+    if (conditionParts[0] <= value && value <= conditionParts[2]) {
+      return true;
+    }
   }
 
   return false;
@@ -357,17 +369,54 @@ function matchesRange(condition, value) {
  *
  */
 function matchesList(condition, value){
-  conditionParts = condition.split(',');
-  for(var i=0;i<conditionParts.length;i++){
-    for(var j=0;j<weatherConditionList.length;j++){
-      if (conditionParts[i] === weatherConditionList[j] && value === weatherConditionList[j]) {
-        return true;
+  if (condition.indexOf('not') === -1)
+  {
+    //console.log('inside matchesList()')
+    condition.replace(/\s/,'' )
+    conditionParts = condition.split(',');
+    for(var i=0;i<conditionParts.length;i++){
+      for(var j=0;j<weatherConditionList.length;j++){
+        if (conditionParts[i] === weatherConditionList[j] && value === weatherConditionList[j]) {
+          //console.log('inside matchesList()')
+          return true;
+        }
       }
     }
+    
   }
+  
   return false;
   
 }
+
+/**
+ *Evaluates whether a value is NOT within the list of values set
+ * @param {string} condition The condition to be checked (e.g. 5 to 18).
+ * @param {number} value The value to be checked.
+ * @return {boolean} True if the value is in the desired range, false otherwise.
+ *
+ */
+function matchesNotList(condition, value){
+  if (condition.indexOf('not') > -1) {
+    //console.log('inside matchesNotList()')
+    condition.replace(/not/ig,'' )
+    condition.replace(/\s/,'' )
+    conditionParts = condition.split(',');
+    for(var i=0;i<conditionParts.length;i++){
+      for(var j=0;j<weatherConditionList.length;j++){
+        if (conditionParts[i] === weatherConditionList[j] && value === weatherConditionList[j]) {
+          //console.log('inside matchesNotList()')
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+ 
+  return false;
+  
+}
+
 
 
 /**
@@ -418,12 +467,12 @@ function getWeather(location) {
 function adjustBids(campaignName, geocodes, bidModifier) {
   // Get the campaign.
   var campaignIterator = AdWordsApp.campaigns().withCondition(Utilities.formatString('CampaignName = "%s"', campaignName)).get();
-  console.log("inside of adjust bids")
+  //console.log("inside of adjust bids")
   while (campaignIterator.hasNext()) {
     var campaign = campaignIterator.next();
     // Get the targeted locations.
     var locations = campaign.targeting().targetedLocations().get();
-    console.log("locations: " +locations);
+    //console.log("locations: " +locations);
     while (locations.hasNext()) {
       var location = locations.next();
       var currentBidModifier = location.getBidModifier().toFixed(2);
