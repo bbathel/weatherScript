@@ -363,8 +363,8 @@ function matchesRange(condition, value) {
 
 /**
  *Evaluates whether a value is within the list of rainy values set
- * @param {string} condition The condition to be checked (e.g. 5 to 18).
- * @param {number} value The value to be checked.
+ * @param {string} condition The condition to be checked (501,502,800).
+ * @param {string } value a string of comma seperated numbers that should be matched.
  * @return {boolean} True if the value is in the desired range, false otherwise.
  *
  */
@@ -391,21 +391,21 @@ function matchesList(condition, value){
 
 /**
  *Evaluates whether a value is NOT within the list of values set
- * @param {string} condition The condition to be checked (e.g. 5 to 18).
- * @param {number} value The value to be checked.
+ * @param {string} condition The condition to be checked (not 501,502,800).
+ * @param {string} value  A string of comma seperated numbers that shouldn't match.
  * @return {boolean} True if the value is in the desired range, false otherwise.
  *
  */
 function matchesNotList(condition, value){
   if (condition.indexOf('not') > -1) {
     //console.log('inside matchesNotList()')
-    condition.replace(/not/ig,'' )
-    condition.replace(/\s/,'' )
+    condition = condition.replace(/not/ig,'' ); 
+    condition = condition.replace(/\s/,'' )
     conditionParts = condition.split(',');
     for(var i=0;i<conditionParts.length;i++){
       for(var j=0;j<weatherConditionList.length;j++){
         if (conditionParts[i] === weatherConditionList[j] && value === weatherConditionList[j]) {
-          //console.log('inside matchesNotList()')
+          //console.log('inside matchesNotList() II')
           return false;
         }
       }

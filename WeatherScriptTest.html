@@ -280,6 +280,18 @@
       console.log(weatherRules.WeatherCode);
     /* test 6 */
     assert.equal(evaluateWeatherRules(weatherRules, weather),true,"testing if it daysInFuture is set to 3 and not expecting rain 3 days in the future, and it doesn't rain in 3 day." )
+    weatherRules =
+        {
+            'condition': 'rain',
+            'temperature': "0 to 90",
+            'precipitation': "above 0",
+            'wind': "above 0",
+            'daysInFuture' : 4,
+            'WeatherCode' : 'not 500,502'
+        }   
+      console.log(weatherRules.WeatherCode);
+    /* test 6 */
+    assert.equal(evaluateWeatherRules(weatherRules, weather),false,"Testing DaysInFuture Set to 4, WeatherCode: not 500,502; and expected WeatherCode is 500" )
 
 
     });
