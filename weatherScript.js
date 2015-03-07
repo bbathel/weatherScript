@@ -54,7 +54,7 @@ function getSheetData(spreadsheet, sheetIndex) {
  * @return {Object.<string, Array.<Object>> } A map, with key as campaign name,
  *     and value as an array of rules that apply to this campaign.
  */
-function buildCampaignRulesMapping(campaignRulesData) {
+function buildCampaignRulesMapping(campaignRulesData, geoMappingData) {
   var campaignMapping = {};
   for (var i = 0; i < campaignRulesData.length; i++) {     
     // Skip rule if not enabled.
@@ -112,7 +112,10 @@ function buildWeatherConditionMapping(weatherConditionData) {
       'daysInFuture' : Math.round(weatherConditionData[i][4]),//parseInt(weatherConditionData[i][4]),
       
       // Weather codes that make up this condition
-      'WeatherCode' : weatherConditionData[i][5]
+      'WeatherCode' : weatherConditionData[i][5],
+      
+      //Stopping time for the condition test
+      'StoppingTime' : weatherConditionData[i][6]
     };
     
 
@@ -213,45 +216,85 @@ function toFahrenheit(kelvin) {
 function evaluateWeatherRules(weatherRules, weather) {
   // See http://bugs.openweathermap.org/projects/api/wiki/Weather_Data
   // for values returned by OpenWeatherMap API.
-  var mm_to_inches = 0.0393701;
   var precipitation = [];
   var weatherValue = "";
   var temperature = [];
   var windspeed = [];
   var cloudiness = [];
   var matchesRule = false;
-  
- 
-  if ((weatherRules.hasOwnProperty('daysInFuture')===false) || (typeof weatherRules.daysInFuture === undefined)) {
-    weatherRules.daysInFuture = 0;
-  }
-  for(var i=weatherRules.daysInFuture;i<=weatherRules.daysInFuture && i < weather.list.length;i++)
-  {
-    if (weather.list[i].weather[0].main.toLowerCase().indexOf('rain') != -1) {
-      precipitation[i] = 1;
-    }else{
-      precipitation[i] = 0; //0;
-    }
-    temperature[i]= toFahrenheit(weather.list[i].temp['day']);
-    //Logger.log("temp "+toFahrenheit(weather.list[i].temp['day']))
-    windspeed[i] = weather.list[i].speed.toFixed(2);
-    //Logger.log("wind "+weather.list[i].speed.toFixed(2))
-    cloudiness[i] = weather.list[i].clouds;
-    //Logger.log("Cloud "+weather.list[i].clouds)
-    weatherCode = weather.list[i].weather[0].id.toString();
-    //Logger.log("Weather Code "+weather.list[i].weather[0].id.toString())
-    if ( evaluateMatchRules(weatherRules.temperature, temperature[i])
-        //&& evaluateMatchRules(weatherRules.precipitation, precipitation[i])
-        && evaluateMatchRules(weatherRules.wind, windspeed[i])
-        && evaluateMatchRules(weatherRules.WeatherCode, weatherCode)){
-        matchesRule=true;
-        break;
-      }//end if
 
-  }//end for
-  return matchesRule;
+  if ( ruleIsEnabled(weatherRules) &&  beforeStoppingTime(weatherRules.StoppingTime)) {
+    
+    if ((typeof weatherRules.daysInFuture === undefined) || (weatherRules.hasOwnProperty('daysInFuture')===false)) {
+      weatherRules.daysInFuture = 0;
+    }
+    for(var i=weatherRules.daysInFuture;i<=weatherRules.daysInFuture && i < weather.list.length;i++)
+    {
+      Logger.log("Rule is enabled and BeforeStoppingTIme")
+      if (weather.list[i].weather[0].main.toLowerCase().indexOf('rain') != -1) {
+        precipitation[i] = 1;
+      }else{
+        precipitation[i] = 0; //0;
+      }
+      temperature[i]= toFahrenheit(weather.list[i].temp['day']);
+      //Logger.log("temp "+toFahrenheit(weather.list[i].temp['day']))
+      windspeed[i] = weather.list[i].speed.toFixed(2);
+      //Logger.log("wind "+weather.list[i].speed.toFixed(2))
+      cloudiness[i] = weather.list[i].clouds;
+      //Logger.log("Cloud "+weather.list[i].clouds)
+      weatherCode = weather.list[i].weather[0].id.toString();
+      //Logger.log("Weather Code "+weather.list[i].weather[0].id.toString())
+      if ( evaluateMatchRules(weatherRules.temperature, temperature[i])
+          //&& evaluateMatchRules(weatherRules.precipitation, precipitation[i])
+          && evaluateMatchRules(weatherRules.wind, windspeed[i])
+          && evaluateMatchRules(weatherRules.WeatherCode, weatherCode)){
+          matchesRule=true;
+          break;
+        }//end if
+  
+    }//end for
+    
+  }return matchesRule;
 }
 
+/**
+ * If rule is enable run the loop
+ **/
+function ruleIsEnabled(weatherRules){
+ return weatherRules != null;  
+}
+
+/**
+ * Compares Stopping time to actual time and if after time then don't run the rule
+ * @param {string} stopping time with am or pm appended.
+ **/
+function beforeStoppingTime(stoppingTime) {
+  var realTime = new Date().getHours() + 2;
+
+  if (stoppingTime === undefined || stoppingTime === '' ){
+    return true;
+  }
+  else if(stoppingTime.indexOf('pm') != -1)
+  {
+    stoppingTime = stoppingTime.replace(/pm/ig, '')
+    if (stoppingTime != 12)
+    {
+      stoppingTime = parseInt(stoppingTime) + 12
+    }    
+  }
+  else if (stoppingTime.indexOf('am') != -1)
+  {
+    stoppingTime = stoppingTime.replace(/am/ig, '')
+    stoppingTime = parseInt(stoppingTime) ;
+    if (stoppingTime === 12) {
+      stoppingTime = 24;
+    }
+ 
+  }
+  //Logger.log("Real time: " + realTime + " Stopping Time: " + stoppingTime + " " + (realTime < stoppingTime))
+  return realTime < stoppingTime;
+  
+}
 /**
  * Evaluates a condition for a value against a set of known evaluation rules.
  * @param {string} condition The condition to be checked.
@@ -282,7 +325,7 @@ function evaluateMatchRules(condition, value) {
  * condition, false otherwise.
  */
 function matchesBelow(condition, value) {
-  if (condition.indexOf('not') === -1)
+  if (condition.indexOf('not') === -1 || condition == "" )
   {
     //console.log('Inside MatchesBelow')
     conditionParts = condition.split(' ');
@@ -310,7 +353,7 @@ function matchesBelow(condition, value) {
  *     condition, false otherwise.
  */
 function matchesAbove(condition, value) {
-  if (condition.indexOf('not') === -1)
+  if (condition.indexOf('not') === -1 || condition == "" )
   {
     //console.log('Inside MatchesAbove')
     conditionParts = condition.split(' ');
@@ -337,7 +380,7 @@ function matchesAbove(condition, value) {
  * @return {boolean} True if the value is in the desired range, false otherwise.
  */
 function matchesRange(condition, value) {
-  if (condition.indexOf('not') === -1)
+  if (condition.indexOf('not') === -1 || condition == "" )
   {
     //console.log('Inside MatchesRange')
     conditionParts = condition.replace('\w+', ' ').split(' ');
@@ -357,7 +400,7 @@ function matchesRange(condition, value) {
     }
   }
 
-  return false;
+return false;
 }
 
 
@@ -369,7 +412,7 @@ function matchesRange(condition, value) {
  *
  */
 function matchesList(condition, value){
-  if (condition.indexOf('not') === -1)
+  if (condition.indexOf('not') === -1 || condition == "" )
   {
     //console.log('inside matchesList()')
     condition.replace(/\s/,'' )
@@ -397,7 +440,7 @@ function matchesList(condition, value){
  *
  */
 function matchesNotList(condition, value){
-  if (condition.indexOf('not') > -1) {
+  if (condition.indexOf('not') > -1 || condition == "") {
     //console.log('inside matchesNotList()')
     condition = condition.replace(/not/ig,'' ); 
     condition = condition.replace(/\s/,'' )
@@ -476,11 +519,11 @@ function adjustBids(campaignName, geocodes, bidModifier) {
     while (locations.hasNext()) {
       var location = locations.next();
       var currentBidModifier = location.getBidModifier().toFixed(2);
-      Logger.log("more inside of adjust bids")
+      //Logger.log("more inside of adjust bids")
       // Apply the bid modifier only if the campaign has a custom targeting
       // for this geo location.
 
-      if (geocodes.indexOf(location.getId()) //!= -1
+      if (geocodes.indexOf(location.getId()) != -1
           /*&& currentBidModifier != bidModifier*/) {
         Logger.log('Setting bidModifier = %s for campaign name = %s, ' +
             'geoCode = %s. Old bid modifier is %s.', bidModifier, campaignName,
