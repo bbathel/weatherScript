@@ -1,7 +1,7 @@
 // Register for an API key at http://openweathermap.org/appid
 // and enter the key below.
 var OPEN_WEATHER_MAP_API_KEY = "f0297e9f8e4573d5641bb8720bfafa0e";
-//var console = Logger;
+//var Logger = Logger;
 // Create a copy of http://goo.gl/SNE5H7 and enter the URL below.
 var SPREADSHEET_URL = 'https://docs.google.com/a/searchinfluence.com/spreadsheet/ccc?key=0All7Ng2pAyH8dFphTzczSHFkS1Bza29HeXJ3VjVsNnc';
 
@@ -230,20 +230,20 @@ function evaluateWeatherRules(weatherRules, weather) {
     }
     for(var i=weatherRules.daysInFuture;i<=weatherRules.daysInFuture && i < weather.list.length;i++)
     {
-      Logger.log("Rule is enabled and BeforeStoppingTIme")
+      //Logger.log("Rule is enabled and BeforeStoppingTIme")
       if (weather.list[i].weather[0].main.toLowerCase().indexOf('rain') != -1) {
         precipitation[i] = 1;
       }else{
         precipitation[i] = 0; //0;
       }
       temperature[i]= toFahrenheit(weather.list[i].temp['day']);
-      //Logger.log("temp "+toFahrenheit(weather.list[i].temp['day']))
+      Logger.log("temp "+toFahrenheit(weather.list[i].temp['day']))
       windspeed[i] = weather.list[i].speed.toFixed(2);
-      //Logger.log("wind "+weather.list[i].speed.toFixed(2))
+      Logger.log("wind "+weather.list[i].speed.toFixed(2))
       cloudiness[i] = weather.list[i].clouds;
-      //Logger.log("Cloud "+weather.list[i].clouds)
+      Logger.log("Cloud "+weather.list[i].clouds)
       weatherCode = weather.list[i].weather[0].id.toString();
-      //Logger.log("Weather Code "+weather.list[i].weather[0].id.toString())
+      Logger.log("Weather Code "+weather.list[i].weather[0].id.toString())
       if ( evaluateMatchRules(weatherRules.temperature, temperature[i])
           //&& evaluateMatchRules(weatherRules.precipitation, precipitation[i])
           && evaluateMatchRules(weatherRules.wind, windspeed[i])
@@ -271,7 +271,7 @@ function ruleIsEnabled(weatherRules){
 function beforeStoppingTime(stoppingTime) {
   var realTime = new Date().getHours() + 2;
 
-  if (stoppingTime === undefined || stoppingTime === '' ){
+  if (stoppingTime === undefined){
     return true;
   }
   else if(stoppingTime.indexOf('pm') != -1)
@@ -291,7 +291,7 @@ function beforeStoppingTime(stoppingTime) {
     }
  
   }
-  //Logger.log("Real time: " + realTime + " Stopping Time: " + stoppingTime + " " + (realTime < stoppingTime))
+  Logger.log("Real time: " + realTime + " Stopping Time: " + stoppingTime + " " + (realTime < stoppingTime))
   return realTime < stoppingTime;
   
 }
@@ -325,9 +325,9 @@ function evaluateMatchRules(condition, value) {
  * condition, false otherwise.
  */
 function matchesBelow(condition, value) {
-  if (condition.indexOf('not') === -1 || condition == "" )
+  if (condition.indexOf('not') === -1 )
   {
-    //console.log('Inside MatchesBelow')
+    //Logger.log('Inside MatchesBelow')
     conditionParts = condition.split(' ');
   
     if (conditionParts.length != 2) {
@@ -353,9 +353,9 @@ function matchesBelow(condition, value) {
  *     condition, false otherwise.
  */
 function matchesAbove(condition, value) {
-  if (condition.indexOf('not') === -1 || condition == "" )
+  if (condition.indexOf('not') === -1 )
   {
-    //console.log('Inside MatchesAbove')
+    //Logger.log('Inside MatchesAbove')
     conditionParts = condition.split(' ');
   
     if (conditionParts.length != 2) {
@@ -380,9 +380,9 @@ function matchesAbove(condition, value) {
  * @return {boolean} True if the value is in the desired range, false otherwise.
  */
 function matchesRange(condition, value) {
-  if (condition.indexOf('not') === -1 || condition == "" )
+  if (condition.indexOf('not') === -1 )
   {
-    //console.log('Inside MatchesRange')
+    //Logger.log('Inside MatchesRange')
     conditionParts = condition.replace('\w+', ' ').split(' ');
   
     if (conditionParts.length != 3) {
@@ -412,15 +412,15 @@ return false;
  *
  */
 function matchesList(condition, value){
-  if (condition.indexOf('not') === -1 || condition == "" )
+  if (condition.indexOf('not') === -1  )
   {
-    //console.log('inside matchesList()')
-    condition.replace(/\s/,'' )
+    Logger.log(condition)
+    condition = condition.replace(/\s/,'' )
     conditionParts = condition.split(',');
     for(var i=0;i<conditionParts.length;i++){
       for(var j=0;j<weatherConditionList.length;j++){
         if (conditionParts[i] === weatherConditionList[j] && value === weatherConditionList[j]) {
-          //console.log('inside matchesList()')
+          Logger.log('Matches List: ' + conditionParts[i])
           return true;
         }
       }
@@ -440,15 +440,15 @@ function matchesList(condition, value){
  *
  */
 function matchesNotList(condition, value){
-  if (condition.indexOf('not') > -1 || condition == "") {
-    //console.log('inside matchesNotList()')
+  if (condition.indexOf('not') > -1 ) {
+    Logger.log(condition)
     condition = condition.replace(/not/ig,'' ); 
     condition = condition.replace(/\s/,'' )
     conditionParts = condition.split(',');
     for(var i=0;i<conditionParts.length;i++){
       for(var j=0;j<weatherConditionList.length;j++){
         if (conditionParts[i] === weatherConditionList[j] && value === weatherConditionList[j]) {
-          //console.log('inside matchesNotList() II')
+          Logger.log('Matches Not List: ' + conditionParts[i])
           return false;
         }
       }
@@ -510,12 +510,12 @@ function getWeather(location) {
 function adjustBids(campaignName, geocodes, bidModifier) {
   // Get the campaign.
   var campaignIterator = AdWordsApp.campaigns().withCondition(Utilities.formatString('CampaignName = "%s"', campaignName)).get();
-  //console.log("inside of adjust bids")
+  //Logger.log("inside of adjust bids")
   while (campaignIterator.hasNext()) {
     var campaign = campaignIterator.next();
     // Get the targeted locations.
     var locations = campaign.targeting().targetedLocations().get();
-    //console.log("locations: " +locations);
+    //Logger.log("locations: " +locations);
     while (locations.hasNext()) {
       var location = locations.next();
       var currentBidModifier = location.getBidModifier().toFixed(2);
