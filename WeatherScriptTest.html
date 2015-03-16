@@ -92,7 +92,7 @@
                   {//day 4
                     "dt": 1425232800,
                     "temp": {
-                      "day": 293.08,
+                      "day": 294.261,
                       "min": 288.16,
                       "max": 293.08,
                       "night": 289.15,
@@ -127,7 +127,7 @@
                     "humidity": 0,
                     "weather": [
                       {
-                        "id": 500,
+                        "id": 502,
                         "main": "Rain",
                         "description": "light rain",
                         "icon": "10d"
@@ -152,7 +152,7 @@
                     "humidity": 0,
                     "weather": [
                       {
-                        "id": 502,
+                        "id": 800,
                         "main": "Rain",
                         "description": "heavy intensity rain",
                         "icon": "10d"
@@ -177,7 +177,7 @@
                     "humidity": 0,
                     "weather": [
                       {
-                        "id": 500,
+                        "id": 800,
                         "main": "Rain",
                         "description": "light rain",
                         "icon": "10d"
@@ -292,8 +292,16 @@
       console.log(weatherRules.WeatherCode);
     /* test 6 */
     assert.equal(evaluateWeatherRules(weatherRules, weather),false,"Testing DaysInFuture Set to 4, WeatherCode: not 500,502; and expected WeatherCode is 500" )
-
-
+    weatherRules =
+        {
+            'condition': 'Normal',
+            'temperature': "50 to 90",
+            'precipitation': "above 0",
+            'wind': "above 0",
+            'daysInFuture' : 5,
+            'WeatherCode' : 'not 201,202,501'
+        }   
+    assert.equal(evaluateWeatherRules(weatherRules, weather),true,"Testing DaysInFuture Set to 5, WeatherCode: 'not 201,202,501', temp is set to 79; and expected WeatherCode is 800" )
     });
     
   </script>

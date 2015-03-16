@@ -97,25 +97,25 @@ function buildWeatherConditionMapping(weatherConditionData) {
     var weatherConditionName = weatherConditionData[i][0];
     weatherConditionMapping[weatherConditionName] = {
       // Condition name (e.g. Sunny)
-      'condition': weatherConditionName,
+      'condition': String(weatherConditionName),
 
       // Temperature (e.g. 50 to 70)
-      'temperature': weatherConditionData[i][1],
+      'temperature': String(weatherConditionData[i][1]),
 
       // Precipitation (e.g. below 70)
-      //'precipitation': weatherConditionData[i][2],
+      'precipitation': weatherConditionData[i][2],
 
       // Wind speed (e.g. above 5)
-      'wind': weatherConditionData[i][3],
+      'wind': String(weatherConditionData[i][3]),
       
       // Days in the Future to look to
       'daysInFuture' : Math.round(weatherConditionData[i][4]),//parseInt(weatherConditionData[i][4]),
       
       // Weather codes that make up this condition
-      'WeatherCode' : weatherConditionData[i][5],
+      'WeatherCode' : String(weatherConditionData[i][5]),
       
       //Stopping time for the condition test
-      'StoppingTime' : weatherConditionData[i][6]
+      'StoppingTime' : String(weatherConditionData[i][6])
     };
     
 
@@ -230,7 +230,7 @@ function evaluateWeatherRules(weatherRules, weather) {
     }
     for(var i=weatherRules.daysInFuture;i<=weatherRules.daysInFuture && i < weather.list.length;i++)
     {
-      //Logger.log("Rule is enabled and BeforeStoppingTIme")
+      Logger.log("Days in the Future: " + i)
       if (weather.list[i].weather[0].main.toLowerCase().indexOf('rain') != -1) {
         precipitation[i] = 1;
       }else{
@@ -243,10 +243,10 @@ function evaluateWeatherRules(weatherRules, weather) {
       cloudiness[i] = weather.list[i].clouds;
       Logger.log("Cloud "+weather.list[i].clouds)
       weatherCode = weather.list[i].weather[0].id.toString();
-      Logger.log("Weather Code "+weather.list[i].weather[0].id.toString())
+      Logger.log(" Weather Code "+ weather.list[i].weather[0].id.toString())
       if ( evaluateMatchRules(weatherRules.temperature, temperature[i])
           //&& evaluateMatchRules(weatherRules.precipitation, precipitation[i])
-          && evaluateMatchRules(weatherRules.wind, windspeed[i])
+          //&& evaluateMatchRules(weatherRules.wind, windspeed[i])
           && evaluateMatchRules(weatherRules.WeatherCode, weatherCode)){
           matchesRule=true;
           break;
@@ -327,6 +327,7 @@ function evaluateMatchRules(condition, value) {
 function matchesBelow(condition, value) {
   if (condition.indexOf('not') === -1 )
   {
+    
     //Logger.log('Inside MatchesBelow')
     conditionParts = condition.split(' ');
   
@@ -441,7 +442,7 @@ function matchesList(condition, value){
  */
 function matchesNotList(condition, value){
   if (condition.indexOf('not') > -1 ) {
-    Logger.log(condition)
+    Logger.log("Not " + condition)
     condition = condition.replace(/not/ig,'' ); 
     condition = condition.replace(/\s/,'' )
     conditionParts = condition.split(',');
@@ -453,9 +454,9 @@ function matchesNotList(condition, value){
         }
       }
     }
+    Logger.log("returning true for the not list")
     return true;
   }
- 
   return false;
   
 }
