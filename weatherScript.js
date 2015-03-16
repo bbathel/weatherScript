@@ -303,7 +303,7 @@ function beforeStoppingTime(stoppingTime) {
  */
 function evaluateMatchRules(condition, value) {
   // No condition to evaluate, rule passes.
-  if (condition == '') {
+  if (condition == '' || condition == null || condition == ' ') {
     return true;
   }
   var rules = [matchesBelow, matchesAbove, matchesRange, matchesList, matchesNotList];
