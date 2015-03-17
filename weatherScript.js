@@ -230,6 +230,7 @@ function evaluateWeatherRules(weatherRules, weather) {
     }
     for(var i=weatherRules.daysInFuture;i<=weatherRules.daysInFuture && i < weather.list.length;i++)
     {
+      Logger.log("Condition Name " + weatherRules.condition)
       Logger.log("Days in the Future: " + i)
       if (weather.list[i].weather[0].main.toLowerCase().indexOf('rain') != -1) {
         precipitation[i] = 1;
@@ -237,13 +238,14 @@ function evaluateWeatherRules(weatherRules, weather) {
         precipitation[i] = 0; //0;
       }
       temperature[i]= toFahrenheit(weather.list[i].temp['day']);
-      Logger.log("temp "+toFahrenheit(weather.list[i].temp['day']))
+      Logger.log("temp from Open Weather "+toFahrenheit(weather.list[i].temp['day'])+ " from sheet " + weatherRules.temperature )
       windspeed[i] = weather.list[i].speed.toFixed(2);
-      Logger.log("wind "+weather.list[i].speed.toFixed(2))
-      cloudiness[i] = weather.list[i].clouds;
-      Logger.log("Cloud "+weather.list[i].clouds)
+      Logger.log("wind from Open Weather "+weather.list[i].speed.toFixed(2) + " from sheet " + weatherRules.wind)
+      //cloudiness[i] = weather.list[i].clouds;
+      //Logger.log("Cloud from Open Weather "+weather.list[i].clouds + " from sheet " + weatherRules.clouds)
       weatherCode = weather.list[i].weather[0].id.toString();
-      Logger.log(" Weather Code "+ weather.list[i].weather[0].id.toString())
+      Logger.log("Weather Code from Open Weather "+ weather.list[i].weather[0].id.toString() + " from sheet " + weatherRules.WeatherCode)
+     
       if ( evaluateMatchRules(weatherRules.temperature, temperature[i])
           //&& evaluateMatchRules(weatherRules.precipitation, precipitation[i])
           //&& evaluateMatchRules(weatherRules.wind, windspeed[i])
@@ -251,7 +253,7 @@ function evaluateWeatherRules(weatherRules, weather) {
           matchesRule=true;
           break;
         }//end if
-  
+      Logger.log("===========================================================================")
     }//end for
     
   }return matchesRule;
@@ -304,6 +306,7 @@ function beforeStoppingTime(stoppingTime) {
 function evaluateMatchRules(condition, value) {
   // No condition to evaluate, rule passes.
   if (condition == '' || condition == null || condition == ' ') {
+    Logger.log('returning true because empty')
     return true;
   }
   var rules = [matchesBelow, matchesAbove, matchesRange, matchesList, matchesNotList];
@@ -330,7 +333,7 @@ function matchesBelow(condition, value) {
     
     //Logger.log('Inside MatchesBelow')
     conditionParts = condition.split(' ');
-  
+    
     if (conditionParts.length != 2) {
       return false;
     }
@@ -339,7 +342,8 @@ function matchesBelow(condition, value) {
       return false;
     }
   
-    if (value < conditionParts[1]) {
+    if (value < parseInt(conditionParts[1])) {
+      Logger.log("In Matches Below "  + conditionParts)
       return true;
     }
   }
@@ -358,7 +362,7 @@ function matchesAbove(condition, value) {
   {
     //Logger.log('Inside MatchesAbove')
     conditionParts = condition.split(' ');
-  
+    
     if (conditionParts.length != 2) {
       return false;
     }
@@ -367,8 +371,10 @@ function matchesAbove(condition, value) {
       return false;
     }
   
-    if (value > conditionParts[1]) {
+    if (Math.round(parseInt(value)) > parseInt(conditionParts[1])) {
+      Logger.log("Returning true In Matches Above "  + value + " " + conditionParts[1])
       return true;
+    
     }
   }
   return false;
@@ -385,7 +391,7 @@ function matchesRange(condition, value) {
   {
     //Logger.log('Inside MatchesRange')
     conditionParts = condition.replace('\w+', ' ').split(' ');
-  
+    
     if (conditionParts.length != 3) {
     
       return false;
@@ -396,7 +402,8 @@ function matchesRange(condition, value) {
       return false;
     }
   
-    if (conditionParts[0] <= value && value <= conditionParts[2]) {
+    if (Math.round(parseInt(conditionParts[0])) <= Math.round(parseInt(value)) && Math.round(parseInt(value)) <= Math.round(parseInt(conditionParts[2]))) {
+      Logger.log("Returning true In Matches Range " + value + " " + conditionParts)
       return true;
     }
   }
@@ -415,13 +422,13 @@ return false;
 function matchesList(condition, value){
   if (condition.indexOf('not') === -1  )
   {
-    Logger.log(condition)
+    
     condition = condition.replace(/\s/,'' )
     conditionParts = condition.split(',');
     for(var i=0;i<conditionParts.length;i++){
       for(var j=0;j<weatherConditionList.length;j++){
         if (conditionParts[i] === weatherConditionList[j] && value === weatherConditionList[j]) {
-          Logger.log('Matches List: ' + conditionParts[i])
+          Logger.log('Returning true in Matches List: ' + conditionParts[i])
           return true;
         }
       }
@@ -442,10 +449,11 @@ function matchesList(condition, value){
  */
 function matchesNotList(condition, value){
   if (condition.indexOf('not') > -1 ) {
-    Logger.log("Not " + condition)
+    
     condition = condition.replace(/not/ig,'' ); 
     condition = condition.replace(/\s/,'' )
     conditionParts = condition.split(',');
+    
     for(var i=0;i<conditionParts.length;i++){
       for(var j=0;j<weatherConditionList.length;j++){
         if (conditionParts[i] === weatherConditionList[j] && value === weatherConditionList[j]) {
