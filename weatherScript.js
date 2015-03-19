@@ -272,7 +272,9 @@ function ruleIsEnabled(weatherRules){
  **/
 function beforeStoppingTime(stoppingTime) {
   var realTime = new Date().getHours() + 2;
-
+  if (realTime>24) {
+    realTime = realTime%24;
+  }
   if (stoppingTime === undefined){
     return true;
   }
