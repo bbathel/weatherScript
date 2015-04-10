@@ -1,9 +1,9 @@
 // Register for an API key at http://openweathermap.org/appid
 // and enter the key below.
-var OPEN_WEATHER_MAP_API_KEY = "f0297e9f8e4573d5641bb8720bfafa0e";
+var OPEN_WEATHER_MAP_API_KEY = "5b556f77f04d225fe6e9cf55cacbd30d";
 //var Logger = Logger;
 // Create a copy of http://goo.gl/SNE5H7 and enter the URL below.
-var SPREADSHEET_URL = 'https://docs.google.com/a/searchinfluence.com/spreadsheet/ccc?key=0All7Ng2pAyH8dFphTzczSHFkS1Bza29HeXJ3VjVsNnc';
+var SPREADSHEET_URL = 'https://docs.google.com/a/searchinfluence.com/spreadsheets/d/1zTtNjjPMIwue-_rPZzRMDqIqgqIIx59Oi_GN9Ou33d4/edit#gid=0';
 
 // A cache to store the weather for locations already lookedup earlier.
 var WEATHER_LOOKUP_CACHE = {};
@@ -17,9 +17,9 @@ var COUNTER=0;
 function main() {
   // Load data from spreadsheet.
   var spreadsheet = SpreadsheetApp.openByUrl(SPREADSHEET_URL);
-  var campaignRuleData = getSheetData(spreadsheet, 1);
-  var weatherConditionData = getSheetData(spreadsheet, 2);
-  var geoMappingData = getSheetData(spreadsheet, 3);
+  var campaignRuleData = getSheetData(spreadsheet, 0);
+  var weatherConditionData = getSheetData(spreadsheet, 1);
+  var geoMappingData = getSheetData(spreadsheet, 2);
 
   // Convert the data into dictionaries for convenient usage.
   var campaignMapping = buildCampaignRulesMapping(campaignRuleData);
@@ -41,8 +41,7 @@ function main() {
  */
 function getSheetData(spreadsheet, sheetIndex) {
   var sheet = spreadsheet.getSheets()[sheetIndex];
-  var range =
-      sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn());
+  var range = sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn());
   return range.getValues();
 }
 
