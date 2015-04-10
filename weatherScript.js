@@ -274,7 +274,7 @@ function beforeStoppingTime(stoppingTime) {
   if (realTime>24) {
     realTime = realTime%24;
   }
-  if (stoppingTime === undefined){
+  if (stoppingTime === undefined || stoppingTime === ''){
     return true;
   }
   else if(stoppingTime.indexOf('pm') != -1)
