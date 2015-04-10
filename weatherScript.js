@@ -65,7 +65,7 @@ function buildCampaignRulesMapping(campaignRulesData, geoMappingData) {
           'name': campaignName,
 
           // location for which this rule applies.
-          'location': 4335045,
+          'location': geoMappingData[i][1],
 
           // the weather condition (e.g. Sunny)
           'condition': campaignRulesData[i][2],
